@@ -1,16 +1,23 @@
+# Import asyncio pour l'initialisation
+import asyncio
+"""
+Factory pour gérer les moteurs OCR avec fallback intelligent
+"""
 import logging
 import time
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 import numpy as np
 
 from .base_ocr import BaseOCRService
 from .paddleocr_service import PaddleOCRService
 from .easyocr_service import EasyOCRService
 from .kraken_service import KrakenOCRService
-from ..config import settings
+from ..config import get_settings
 from ..schemas.engine import EngineResult, EngineInfo
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
+
 
 class OCRFactory:
     """
@@ -19,31 +26,63 @@ class OCRFactory:
     
     def __init__(self):
         self.engines: Dict[str, BaseOCRService] = {}
-        self._initialize_engines()
+        self._initialize_engines_sync()  # ✅ CHANGÉ: version synchrone
     
-    def _initialize_engines(self):
-        """Initialise tous les moteurs disponibles"""
+    def _initialize_engines_sync(self):
+        """Initialise tous les moteurs disponibles (version synchrone)"""
         logger.info("🔧 Initialisation des moteurs OCR...")
         
         # PaddleOCR
         if "paddleocr" in settings.available_engines:
-            paddle = PaddleOCRService()
-            if asyncio.run(paddle.initialize()):
-                self.engines["paddleocr"] = paddle
+            try:
+                paddle = PaddleOCRService()
+                # ✅ CHANGÉ: Appel synchrone direct
+                import asyncio
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                success = loop.run_until_complete(paddle.initialize())
+                loop.close()
+                
+                if success:
+                    self.engines["paddleocr"] = paddle
+                    logger.info("✅ PaddleOCR disponible")
+            except Exception as e:
+                logger.warning(f"PaddleOCR non disponible: {e}")
         
         # EasyOCR
         if "easyocr" in settings.available_engines:
-            easy = EasyOCRService()
-            if asyncio.run(easy.initialize()):
-                self.engines["easyocr"] = easy
+            try:
+                easy = EasyOCRService()
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                success = loop.run_until_complete(easy.initialize())
+                loop.close()
+                
+                if success:
+                    self.engines["easyocr"] = easy
+                    logger.info("✅ EasyOCR disponible")
+            except Exception as e:
+                logger.warning(f"EasyOCR non disponible: {e}")
         
         # Kraken
         if "kraken" in settings.available_engines:
-            kraken = KrakenOCRService()
-            if asyncio.run(kraken.initialize()):
-                self.engines["kraken"] = kraken
+            try:
+                kraken = KrakenOCRService()
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                success = loop.run_until_complete(kraken.initialize())
+                loop.close()
+                
+                if success:
+                    self.engines["kraken"] = kraken
+                    logger.info("✅ Kraken disponible")
+            except Exception as e:
+                logger.warning(f"Kraken non disponible: {e}")
         
-        logger.info(f"✅ Moteurs disponibles: {list(self.engines.keys())}")
+        if not self.engines:
+            logger.error("❌ Aucun moteur OCR disponible!")
+        else:
+            logger.info(f"✅ Moteurs disponibles: {list(self.engines.keys())}")
     
     def get_engine(self, engine_name: str) -> Optional[BaseOCRService]:
         """Récupère un moteur spécifique"""
@@ -141,8 +180,10 @@ class OCRFactory:
         
         return "", 0.0, engines_results
 
+
 # Instance globale
-_ocr_factory_instance = None
+_ocr_factory_instance: Optional[OCRFactory] = None
+
 
 def get_ocr_factory() -> OCRFactory:
     """Récupère l'instance de la factory (Singleton)"""
@@ -150,6 +191,3 @@ def get_ocr_factory() -> OCRFactory:
     if _ocr_factory_instance is None:
         _ocr_factory_instance = OCRFactory()
     return _ocr_factory_instance
-
-# Import asyncio pour l'initialisation
-import asyncio

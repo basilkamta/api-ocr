@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query, Body
-from typing import Optional
+from typing import List, Optional
 import tempfile
 from pathlib import Path
 import time

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from typing import List
 
 from ....schemas.engine import EngineInfo, EnginesListResponse, EngineTestResponse
-from ....schemas.responses import StandardResponse
+from ....schemas.response import StandardResponse
 from ....services.ocr_factory import get_ocr_factory, OCRFactory
 from ....dependencies import get_current_api_key
 from ....config import get_settings
