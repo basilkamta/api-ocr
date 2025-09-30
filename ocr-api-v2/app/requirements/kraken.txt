@@ -1,0 +1,4 @@
+# Kraken OCR
+kraken==4.3.13
+lxml==5.1.0
+Click==8.1.7

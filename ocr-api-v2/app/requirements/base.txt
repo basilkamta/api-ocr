@@ -1,0 +1,33 @@
+# Framework Web
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-multipart
+
+# Base de données
+sqlalchemy
+alembic
+asyncpg
+psycopg2-binary
+
+# Cache et Message Queue
+redis
+celery
+kombu
+
+# Sécurité
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Monitoring et Logs
+prometheus-client
+structlog
+python-json-logger
+
+# Utilitaires
+aiofiles
+python-dateutil
+pytz
+psutil
