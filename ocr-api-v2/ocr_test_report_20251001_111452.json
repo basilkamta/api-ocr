@@ -1,0 +1,92 @@
+{
+  "summary": {
+    "total_tests": 1,
+    "successful_tests": 1,
+    "failed_tests": 0,
+    "average_processing_time": 22.311732292175293,
+    "average_accuracy": null,
+    "timestamp": "2025-10-01T11:14:52.624421"
+  },
+  "results": [
+    {
+      "file": "MD_2406688.pdf",
+      "success": true,
+      "processing_time": 22.311732292175293,
+      "engines_used": [
+        "easyocr"
+      ],
+      "confidence": 0.8553464401015555,
+      "text_length": 944,
+      "metadata": {
+        "mandat": {
+          "type": "mandat",
+          "number": "2406687",
+          "full_reference": "MD/2406687",
+          "confidence": 0.85,
+          "coordinates": null
+        },
+        "bordereau": {
+          "type": "bordereau",
+          "number": "2401530",
+          "full_reference": "BOR/2401530",
+          "confidence": 0.85,
+          "coordinates": null
+        },
+        "exercice": "2024",
+        "dates": [
+          {
+            "value": "2024-07-16T00:00:00",
+            "formatted": "16/07/2024",
+            "type": "autre",
+            "confidence": 0.8
+          },
+          {
+            "value": "2024-06-21T00:00:00",
+            "formatted": "21/06/2024",
+            "type": "autre",
+            "confidence": 0.8
+          },
+          {
+            "value": "2024-05-30T00:00:00",
+            "formatted": "30/05/2024",
+            "type": "autre",
+            "confidence": 0.8
+          },
+          {
+            "value": "2024-05-30T00:00:00",
+            "formatted": "30/05/2024",
+            "type": "autre",
+            "confidence": 0.8
+          },
+          {
+            "value": "2024-06-21T00:00:00",
+            "formatted": "21/06/2024",
+            "type": "autre",
+            "confidence": 0.8
+          }
+        ],
+        "amounts": [
+          {
+            "value": 1673100.0,
+            "currency": "XAF",
+            "formatted": "1 673 100 FCFA",
+            "type": "total",
+            "confidence": 0.85
+          }
+        ],
+        "beneficiaire": {
+          "name": "AC PIC Impôts",
+          "confidence": 0.75
+        }
+      },
+      "validation": {
+        "is_valid": true,
+        "errors": [],
+        "warnings": [],
+        "confidence": 0.8550000000000001
+      },
+      "comparison": null,
+      "timestamp": "2025-10-01T11:14:52.615415"
+    }
+  ]
+}
