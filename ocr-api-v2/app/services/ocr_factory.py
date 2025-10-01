@@ -1,5 +1,3 @@
-# Import asyncio pour l'initialisation
-import asyncio
 """
 Factory pour gérer les moteurs OCR avec fallback intelligent
 """
@@ -26,58 +24,58 @@ class OCRFactory:
     
     def __init__(self):
         self.engines: Dict[str, BaseOCRService] = {}
-        self._initialize_engines_sync()  # ✅ CHANGÉ: version synchrone
+        self._initialized = False
     
-    def _initialize_engines_sync(self):
-        """Initialise tous les moteurs disponibles (version synchrone)"""
+    async def initialize_engines(self):
+        """Initialise tous les moteurs disponibles (version asynchrone)"""
+        if self._initialized:
+            return
+        
         logger.info("🔧 Initialisation des moteurs OCR...")
         
         # PaddleOCR
         if "paddleocr" in settings.available_engines:
             try:
                 paddle = PaddleOCRService()
-                # ✅ CHANGÉ: Appel synchrone direct
-                import asyncio
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                success = loop.run_until_complete(paddle.initialize())
-                loop.close()
+                success = await paddle.initialize()
                 
                 if success:
                     self.engines["paddleocr"] = paddle
                     logger.info("✅ PaddleOCR disponible")
+                else:
+                    logger.warning("⚠️  PaddleOCR: initialisation échouée")
             except Exception as e:
-                logger.warning(f"PaddleOCR non disponible: {e}")
+                logger.warning(f"❌ PaddleOCR non disponible: {e}")
         
         # EasyOCR
         if "easyocr" in settings.available_engines:
             try:
                 easy = EasyOCRService()
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                success = loop.run_until_complete(easy.initialize())
-                loop.close()
+                success = await easy.initialize()
                 
                 if success:
                     self.engines["easyocr"] = easy
                     logger.info("✅ EasyOCR disponible")
+                else:
+                    logger.warning("⚠️  EasyOCR: initialisation échouée")
             except Exception as e:
-                logger.warning(f"EasyOCR non disponible: {e}")
+                logger.warning(f"❌ EasyOCR non disponible: {e}")
         
         # Kraken
         if "kraken" in settings.available_engines:
             try:
                 kraken = KrakenOCRService()
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                success = loop.run_until_complete(kraken.initialize())
-                loop.close()
+                success = await kraken.initialize()
                 
                 if success:
                     self.engines["kraken"] = kraken
                     logger.info("✅ Kraken disponible")
+                else:
+                    logger.warning("⚠️  Kraken: initialisation échouée")
             except Exception as e:
-                logger.warning(f"Kraken non disponible: {e}")
+                logger.warning(f"❌ Kraken non disponible: {e}")
+        
+        self._initialized = True
         
         if not self.engines:
             logger.error("❌ Aucun moteur OCR disponible!")
@@ -109,6 +107,10 @@ class OCRFactory:
         Returns:
             (texte, confiance, historique_moteurs)
         """
+        # S'assurer que les moteurs sont initialisés
+        if not self._initialized:
+            await self.initialize_engines()
+        
         engines_results = []
         
         # Déterminer l'ordre des moteurs

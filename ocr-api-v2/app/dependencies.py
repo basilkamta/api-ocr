@@ -13,9 +13,18 @@ async def get_current_api_key(api_key: str = Depends(get_api_key)) -> str:
     """Dépendance pour récupérer la clé API validée"""
     return api_key
 
-def get_ocr_factory_dep() -> OCRFactory:
-    """Dépendance pour le factory OCR"""
-    return get_ocr_factory()
+async def get_ocr_factory_dep() -> OCRFactory:
+    """
+    Dépendance pour le factory OCR
+    S'assure que les moteurs sont initialisés
+    """
+    factory = get_ocr_factory()
+    
+    # Initialisation lazy si pas encore fait
+    if not factory._initialized:
+        await factory.initialize_engines()
+    
+    return factory
 
 def get_extractor() -> MetadataExtractor:
     """Dépendance pour l'extracteur de métadonnées"""

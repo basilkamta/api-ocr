@@ -101,9 +101,13 @@ async def startup_event():
         version=settings.app_version
     )
     
-    # Initialisation des moteurs OCR
+    # ✅ CORRECTION: Initialisation asynchrone des moteurs OCR
     from .services.ocr_factory import get_ocr_factory
     factory = get_ocr_factory()
+    
+    # Appel asynchrone de la méthode d'initialisation
+    await factory.initialize_engines()
+    
     logger.info(
         "engines_initialized",
         engines=factory.get_available_engines()

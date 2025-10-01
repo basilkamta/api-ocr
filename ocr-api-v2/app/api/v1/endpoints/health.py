@@ -11,7 +11,7 @@ from ....config import get_settings
 router = APIRouter()
 settings = get_settings()
 
-@router.get("/", response_model=HealthResponse, tags=["Health"])
+@router.get("/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
     """
     Vérification basique de santé de l'API

@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 from typing import List, Optional
 from functools import lru_cache
 import os
+from pathlib import Path
 
 class Settings(BaseSettings):
     """Configuration globale de l'application"""
@@ -42,8 +43,9 @@ class Settings(BaseSettings):
     easy_download_enabled: bool = True
     
     # Kraken
-    kraken_model: str = "fr_best.mlmodel"
+    kraken_model: str = "/app/models/fr_best.mlmodel"  # ✅ Chemin absolu
     kraken_device: str = "cpu"
+    models_dir: str = "/app/models"  # ✅ Nouveau: répertoire des modèles
     
     # Preprocessing
     enable_preprocessing: bool = True
@@ -90,3 +92,7 @@ def get_settings() -> Settings:
     return Settings()
 
 settings = get_settings()
+
+
+# ✅ Créer le répertoire des modèles au démarrage
+Path(settings.models_dir).mkdir(parents=True, exist_ok=True)

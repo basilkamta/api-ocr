@@ -2,6 +2,7 @@ import logging
 from typing import List, Dict, Tuple
 import numpy as np
 from PIL import Image
+from pathlib import Path
 
 try:
     from kraken import binarization, pageseg, rpred
@@ -32,17 +33,94 @@ class KrakenOCRService(BaseOCRService):
             return False
         
         try:
-            # Chargement du modèle français
-            # Note: Le modèle doit être téléchargé au préalable
-            # kraken get fr_best.mlmodel
-            self.model = models.load_any(settings.kraken_model)
+            model_path = Path(settings.kraken_model)
+            
+            # ✅ Vérifier si le modèle existe
+            if not model_path.exists():
+                logger.warning(f"Modèle Kraken non trouvé: {model_path}")
+                logger.info("💡 Téléchargement du modèle...")
+                
+                # Télécharger le modèle
+                success = await self._download_model(model_path)
+                if not success:
+                    logger.error("Échec du téléchargement du modèle Kraken")
+                    return False
+            
+            # Chargement du modèle
+            logger.info(f"Chargement du modèle Kraken: {model_path}")
+            self.model = models.load_any(str(model_path))
+            
             self.is_initialized = True
             logger.info("✅ Kraken initialisé")
             return True
+            
         except Exception as e:
             logger.error(f"Erreur initialisation Kraken: {e}")
-            logger.info("💡 Téléchargez le modèle: kraken get fr_best.mlmodel")
             return False
+    
+    async def _download_model(self, model_path: Path) -> bool:
+        """
+        Télécharge le modèle Kraken français
+        
+        Args:
+            model_path: Chemin où sauvegarder le modèle
+        
+        Returns:
+            True si succès
+        """
+        try:
+            import urllib.request
+            
+            # Créer le répertoire parent
+            model_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # URL du modèle français
+            # Alternative: utiliser kraken get fr_best.mlmodel
+            url = "https://github.com/mittagessen/kraken/raw/main/models/fr_best.mlmodel"
+            
+            logger.info(f"📥 Téléchargement depuis: {url}")
+            
+            # Télécharger
+            urllib.request.urlretrieve(url, str(model_path))
+            
+            if model_path.exists() and model_path.stat().st_size > 0:
+                logger.info(f"✅ Modèle téléchargé: {model_path}")
+                return True
+            else:
+                logger.error("Le fichier téléchargé est vide ou inexistant")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Erreur téléchargement modèle Kraken: {e}")
+            
+            # Méthode alternative: utiliser kraken CLI
+            try:
+                import subprocess
+                logger.info("Tentative avec kraken CLI...")
+                
+                result = subprocess.run(
+                    ["kraken", "get", "fr_best.mlmodel"],
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minutes max
+                )
+                
+                if result.returncode == 0:
+                    # Déplacer le modèle au bon endroit
+                    import shutil
+                    # kraken télécharge dans ~/.kraken
+                    home_model = Path.home() / ".kraken" / "fr_best.mlmodel"
+                    if home_model.exists():
+                        shutil.copy(home_model, model_path)
+                        logger.info(f"✅ Modèle copié: {model_path}")
+                        return True
+                
+                logger.error(f"Erreur kraken CLI: {result.stderr}")
+                return False
+                
+            except Exception as e2:
+                logger.error(f"Erreur méthode alternative: {e2}")
+                return False
     
     async def extract_text(self, image: np.ndarray) -> Tuple[str, float]:
         """Extrait le texte avec Kraken"""
@@ -67,7 +145,6 @@ class KrakenOCRService(BaseOCRService):
             
             for record in results:
                 texts.append(record.prediction)
-                # Kraken retourne la confiance moyenne
                 confidences.append(record.confidence)
             
             full_text = ' '.join(texts)
