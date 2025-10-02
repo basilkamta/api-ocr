@@ -29,6 +29,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r ./app/requirements/paddle.txt
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r ./app/requirements/kraken.txt
+
 # Copie de l'application
 COPY app/ ./app/
 COPY .env* ./
