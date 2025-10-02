@@ -43,9 +43,9 @@ class Settings(BaseSettings):
     easy_download_enabled: bool = True
     
     # Kraken
-    kraken_model: str = "/app/models/fr_best.mlmodel"  # ✅ Chemin absolu
+    kraken_model: str = "app/models/fr_best.mlmodel"  # ✅ Chemin absolu
     kraken_device: str = "cpu"
-    models_dir: str = "/app/models"  # ✅ Nouveau: répertoire des modèles
+    models_dir: str = "app/models"  # ✅ Nouveau: répertoire des modèles
     
     # Preprocessing
     enable_preprocessing: bool = True
