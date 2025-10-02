@@ -32,6 +32,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r ./app/requirements/kraken.txt
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r ./app/requirements/easy.txt
+
 # Copie de l'application
 COPY app/ ./app/
 COPY .env* ./
